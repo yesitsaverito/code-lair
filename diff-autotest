@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# diff test auto-run
+
+if [ "$#" -ne 4 ]; then
+        echo "Error with inputs, ensure format matches: 
+        hw#tester.sh <program_name> <demo_program> <file_tagline> <num_tests>"
+        exit 1
+fi
+
+echo "For running a singular input file test, enter 's'
+For running multiple file tests in sequence, enter 'm'"
+
+read letter
+
+file_tagline="$3"
+num_tests="$4"
+
+if [ "$letter" == "m" ]; then
+    for((i = 1; i <= num_tests; i++)); do
+            input_file="${file_tagline}${i}.in"
+            output_file="${file_tagline}${i}.out"
+            gt_file="${file_tagline}${i}.gt"
+
+            ./$1 $input_file > $output_file
+
+            $2 $input_file > $gt_file
+
+            diff $output_file $gt_file
+
+        if [ $? -eq 0 ]; then
+            echo "Test $i: Passed"
+        else
+            echo "Test $i: Failed"
+            diff $output_file $gt_file > "diff_output${i}_$file_tagline.txt"
+        fi
+
+    done
+elif [ "$letter" == "s" ]; then
+    input_file="${file_tagline}.in"
+    output_file="${file_tagline}.out"
+    gt_file="${file_tagline}.gt"
+
+    ./$1 $input_file > $output_file
+
+    $2 $input_file > $gt_file
+
+    diff $output_file $gt_file
+
+    if [ $? -eq 0 ]; then
+        echo "Test $i: Passed"
+    else
+        echo "Test $i: Failed"
+        diff $output_file $gt_file > "diff_output_$file_tagline.txt"
+    fi
+fi
